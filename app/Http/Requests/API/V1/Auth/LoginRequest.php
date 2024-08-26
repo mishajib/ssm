@@ -28,7 +28,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /** @default admin@app.com */
             'email'    => 'bail|required|string|email',
+            /** @default password */
             'password' => 'bail|required|string',
         ];
     }

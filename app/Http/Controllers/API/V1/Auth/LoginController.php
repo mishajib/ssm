@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
+    /**
+     * Login
+     *
+     * @unauthenticated
+     */
     public function store(LoginRequest $request): JsonResponse
     {
         $request->authenticate();
@@ -29,6 +34,9 @@ class LoginController extends Controller
 
     }
 
+    /**
+     * Logout
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
@@ -37,6 +45,9 @@ class LoginController extends Controller
         );
     }
 
+    /**
+     * Authenticated User
+     */
     public function currentUser(Request $request): JsonResponse
     {
         return success_response(
