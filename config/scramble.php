@@ -29,7 +29,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'Student Session Management APP API Documentation',
+        'description' => file_get_contents(base_path('README.md')),
     ],
 
     /*

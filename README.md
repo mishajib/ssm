@@ -37,8 +37,6 @@
 - Email: `admin@app.com`
 - Password: `password`
 
-#### API Documentation: [CLICK TO OPEN API DOCUMENTATION](https://APP_URL/docs/api)
-
 <h1 align="center">
 ** Thank you **
 </h1>
