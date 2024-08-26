@@ -1,17 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
 uses(Tests\TestCase::class);
-uses(DatabaseTransactions::class)->in('Feature');
 
 describe('LoginTest', function () {
     test('should return 200 when login with correct credentials', function () {
-
-        $user = \App\Models\User::factory()->create();
-
         $response = $this->postJson('/api/v1/login', [
-            'email' => $user->email,
+            'email' => 'admin@app.com',
             'password' => 'password',
         ]);
 
@@ -34,9 +28,8 @@ describe('LoginTest', function () {
 
 describe('CurrentUserTest', function () {
     test('should return 200 when get current user', function () {
-        $user = \App\Models\User::factory()->create();
         $loginResponse = $this->postJson('/api/v1/login', [
-            'email' => $user->email,
+            'email' => 'admin@app.com',
             'password' => 'password',
         ]);
 
@@ -63,9 +56,8 @@ describe('CurrentUserTest', function () {
 
 describe('LogoutTest', function () {
     test('should return 200 when logged out', function () {
-        $user = \App\Models\User::factory()->create();
         $loginResponse = $this->postJson('/api/v1/login', [
-            'email' => $user->email,
+            'email' => 'admin@app.com',
             'password' => 'password',
         ]);
 
