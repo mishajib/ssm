@@ -13,8 +13,6 @@ class LoginController extends Controller
 {
     /**
      * Login
-     *
-     * @unauthenticated
      */
     public function store(LoginRequest $request): JsonResponse
     {
