@@ -26,10 +26,10 @@ class StudentsController extends Controller
                 ->when($searchQuery, function ($query, $searchQuery) {
                     return $query->where('name', 'LIKE', "%$searchQuery%");
                 })
-                ->paginate($perPage);
+                ->paginate($perPage)->withQueryString();
             return success_response(
                 'Students fetched successfully!',
-                $students,
+                UserResource::collection($students)->response()->getData(true),
             );
         } catch (Exception $e) {
             return error_response(

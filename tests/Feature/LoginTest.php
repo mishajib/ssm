@@ -1,17 +1,19 @@
 <?php
 
+use App\Models\User;
+
 uses(Tests\TestCase::class);
 
 describe('LoginTest', function () {
     test('should return 200 when login with correct credentials', function () {
         $response = $this->postJson('/api/v1/login', [
-            'email' => 'admin@app.com',
+            'email' => 'teacher@app.com',
             'password' => 'password',
         ]);
 
 
         // also check if the response has success key and its value is true
-        $response->assertStatus(\Illuminate\Http\Response::HTTP_OK)
+        $response->assertStatus(200)
             ->assertJsonStructure(['success'])
             ->assertJson(['success' => true]);
     });
@@ -22,23 +24,15 @@ describe('LoginTest', function () {
             'password' => 'invalid',
         ]);
 
-        $response->assertStatus(\Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertStatus(422);
     });
 });
 
 describe('CurrentUserTest', function () {
     test('should return 200 when get current user', function () {
-        $loginResponse = $this->postJson('/api/v1/login', [
-            'email' => 'admin@app.com',
-            'password' => 'password',
-        ]);
+        $user = User::where('email', 'teacher@app.com')->first();
 
-        $tokenType = $loginResponse->json('data.token_type');
-        $token = $loginResponse->json('data.token');
-
-        $response = $this->getJson('/api/v1/user', [
-            'Authorization' => $tokenType . ' ' . $token,
-        ]);
+        $response = $this->actingAs($user)->getJson('/api/v1/user');
 
         // check also if the response has data key and its also has user key
         $response->assertStatus(\Illuminate\Http\Response::HTTP_OK)
@@ -50,31 +44,23 @@ describe('CurrentUserTest', function () {
     test('should return 401 when get current user without token or invalid token', function () {
         $response = $this->getJson('/api/v1/user');
 
-        $response->assertStatus(\Illuminate\Http\Response::HTTP_UNAUTHORIZED);
+        $response->assertStatus(401);
     });
 });
 
 describe('LogoutTest', function () {
     test('should return 200 when logged out', function () {
-        $loginResponse = $this->postJson('/api/v1/login', [
-            'email' => 'admin@app.com',
-            'password' => 'password',
-        ]);
+        $user = User::where('email', 'teacher@app.com')->first();
 
-        $tokenType = $loginResponse->json('data.token_type');
-        $token = $loginResponse->json('data.token');
-
-        $response = $this->postJson('/api/v1/logout', [], [
-            'Authorization' => $tokenType . ' ' . $token,
-        ]);
+        $response = $this->actingAs($user)->postJson('/api/v1/logout');
 
         // check also if the response has data key and its also has user key
-        $response->assertStatus(\Illuminate\Http\Response::HTTP_OK);
+        $response->assertStatus(200);
     });
 
     test('should return 401 when logged out without token or invalid token', function () {
         $response = $this->postJson('/api/v1/logout');
 
-        $response->assertStatus(\Illuminate\Http\Response::HTTP_UNAUTHORIZED);
+        $response->assertStatus(401);
     });
 });

@@ -28,13 +28,30 @@
 
 #### API Endpoints
 
+##### Auth Endpoints
+
 - `POST /api/v1/login` - Login
+- `GET /api/v1/user` - Logged In User
 - `POST /api/v1/logout` - Logout
-- `POST /api/v1/user` - Logged In User
+
+##### Student Endpoints
+
+- `GET /api/v1/students` - List Students
+- `POST /api/v1/students` - Create Student
+- `GET /api/v1/students/{id}` - Show Student
+- `PUT /api/v1/students/{id}` - Update Student
+- `DELETE /api/v1/students/{id}` - Delete Student
 
 #### Login Credentials
 
-- Email: `admin@app.com`
+##### Teacher Login
+
+- Email: `teacher@app.com`
+- Password: `password`
+
+##### Student Login
+
+- Email: `student@app.com`
 - Password: `password`
 
 <h1 align="center">
