@@ -17,7 +17,7 @@ if (!function_exists('success_response')) {
 
 // Error response
 if (!function_exists('error_response')) {
-    function error_response($message = 'Error!', $data = null, $status_code = Response::HTTP_BAD_REQUEST): JsonResponse
+    function error_response($message = 'Error!', $data = null, $status_code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
     {
         return response()->json([
             'success' => false,

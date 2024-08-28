@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\V1\User;
 
 use App\Actions\User\CreateOrUpdateUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\API\V1\User\StudentAvailabilityRequest;
 use App\Http\Requests\API\V1\User\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -22,7 +23,7 @@ class StudentsController extends Controller
         try {
             $perPage = $request->query('per_page', 10);
             $searchQuery = $request->query('query');
-            $students = User::student()
+            $students = User::ofStudent()
                 ->when($searchQuery, function ($query, $searchQuery) {
                     return $query->where('name', 'LIKE', "%$searchQuery%");
                 })
@@ -34,8 +35,6 @@ class StudentsController extends Controller
         } catch (Exception $e) {
             return error_response(
                 'Something went wrong, please try again later!',
-                null,
-                $e->getCode(),
             );
         }
     }
@@ -56,8 +55,6 @@ class StudentsController extends Controller
         } catch (Exception $e) {
             return error_response(
                 'Something went wrong, please try again later!',
-                null,
-                $e->getCode(),
             );
         }
     }
@@ -65,10 +62,10 @@ class StudentsController extends Controller
     /**
      * Show Student
      */
-    public function show(int $student): JsonResponse
+    public function show(int $studentId): JsonResponse
     {
         try {
-            $student = User::student()->find($student);
+            $student = User::ofStudent()->with(['student'])->find($studentId);
 
             if (! $student) {
                 return error_response(
@@ -81,13 +78,10 @@ class StudentsController extends Controller
             return success_response(
                 'Student details fetched successfully!',
                 new UserResource($student),
-                Response::HTTP_CREATED,
             );
         } catch (Exception $e) {
             return error_response(
                 'Something went wrong, please try again later!',
-                null,
-                $e->getCode(),
             );
         }
     }
@@ -95,10 +89,10 @@ class StudentsController extends Controller
     /**
      * Update Student
      */
-    public function update(UserRequest $request, int $student): JsonResponse
+    public function update(UserRequest $request, int $studentId): JsonResponse
     {
         try {
-            $student = User::student()->find($student);
+            $student = User::ofStudent()->find($studentId);
 
             if (! $student) {
                 return error_response(
@@ -113,13 +107,10 @@ class StudentsController extends Controller
                 new UserResource(
                     (new CreateOrUpdateUser())->execute($request->validated(), $student->id)
                 ),
-                Response::HTTP_CREATED,
             );
         } catch (Exception $e) {
             return error_response(
                 'Something went wrong, please try again later!',
-                null,
-                $e->getCode(),
             );
         }
     }
@@ -128,10 +119,10 @@ class StudentsController extends Controller
     /**
      * Delete Student
      */
-    public function destroy(int $student): JsonResponse
+    public function destroy(int $studentId): JsonResponse
     {
         try {
-            $student = User::student()->find($student);
+            $student = User::ofStudent()->find($studentId);
 
             if (! $student) {
                 return error_response(
@@ -145,13 +136,43 @@ class StudentsController extends Controller
             return success_response(
                 'Student updated successfully!',
                 new UserResource($student),
-                Response::HTTP_CREATED,
             );
         } catch (Exception $e) {
             return error_response(
                 'Something went wrong, please try again later!',
-                null,
-                $e->getCode(),
+            );
+        }
+    }
+
+    /**
+     * Set Student Availability
+     */
+    public function weekdayAvailability(StudentAvailabilityRequest $request, int $studentId): JsonResponse
+    {
+        try {
+            $student = User::ofStudent()->with(['student'])->find($studentId);
+
+            if (! $student) {
+                return error_response(
+                    'Student not found!',
+                    null,
+                    Response::HTTP_NOT_FOUND,
+                );
+            }
+
+
+            $student->student()->updateOrCreate(
+                ['user_id' => $student->id],
+                ['weekday_availability' => $request->get('week_days')]
+            );
+
+            return success_response(
+                'Student weekday saved successfully!',
+                new UserResource($student->refresh()),
+            );
+        } catch (Exception $e) {
+            return error_response(
+                $e->getMessage(),
             );
         }
     }

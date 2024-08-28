@@ -14,7 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
@@ -22,5 +22,11 @@ class UserResource extends JsonResource
             'created_at' => formatDateTime($this->created_at),
             'updated_at' => formatDateTime($this->updated_at),
         ];
+
+        if ($this->is_student) {
+            $data['student'] = $this->whenLoaded('student', fn() => new StudentResource($this->student));
+        }
+
+        return $data;
     }
 }

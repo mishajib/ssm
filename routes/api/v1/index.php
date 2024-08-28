@@ -9,7 +9,8 @@ Route::group(['prefix' => 'v1'], function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('teacher')->group(function () {
-            // teacher routes
+            // student routes
+            Route::post('students/{student}/weekday-availability', [StudentsController::class, 'weekdayAvailability']);
             Route::apiResource('students', StudentsController::class);
         });
 

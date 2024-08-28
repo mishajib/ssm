@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -47,9 +47,17 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the student associated with the user.
+     */
+    public function student(): HasOne
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    /**
      * Scope a query to only include students.
      */
-    public function scopeTeacher(Builder $query): void
+    public function scopeOfTeacher(Builder $query): void
     {
         $query->where('is_student', false);
     }
@@ -57,7 +65,7 @@ class User extends Authenticatable
     /**
      * Scope a query to only include students.
      */
-    public function scopeStudent(Builder $query): void
+    public function scopeOfStudent(Builder $query): void
     {
         $query->where('is_student', true);
     }
