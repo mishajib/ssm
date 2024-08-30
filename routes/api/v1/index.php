@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\Student\SessionsController;
 use App\Http\Controllers\API\V1\User\StudentsController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,9 @@ Route::group(['prefix' => 'v1'], function () {
             // student routes
             Route::post('students/{student}/weekday-availability', [StudentsController::class, 'weekdayAvailability']);
             Route::apiResource('students', StudentsController::class);
+
+            // Session routes
+            Route::apiResource('sessions', SessionsController::class);
         });
 
         Route::middleware('student')->group(function () {
