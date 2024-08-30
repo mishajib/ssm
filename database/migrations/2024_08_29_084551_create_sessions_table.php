@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('teacher_id')
+                ->constrained('users')->cascadeOnDelete();
             $table->foreignId('student_id')
                 ->constrained('users')->cascadeOnDelete();
             $table->timestamp('start_time');

@@ -16,6 +16,9 @@ Route::group(['prefix' => 'v1'], function () {
 
             // Session routes
             Route::apiResource('sessions', SessionsController::class);
+            Route::get('sessions', [SessionsController::class, 'index'])->name('sessions.index');
+            Route::post('sessions', [SessionsController::class, 'store'])->name('sessions.store');
+            Route::get('sessions/{session}', [SessionsController::class, 'show'])->name('sessions.show');
         });
 
         Route::middleware('student')->group(function () {

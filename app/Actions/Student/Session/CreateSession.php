@@ -6,6 +6,7 @@ use App\Jobs\SessionRepetitionJob;
 use App\Models\Session;
 use App\Models\User;
 use App\Notifications\SessionReminderNotification;
+use App\Notifications\TeacherSessionReminderNotification;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,12 @@ final class CreateSession
             $user = $this->getUser($studentId);
             $availabilities = $user->student?->weekday_availability;
 
+            if ($availabilities && ! count($availabilities)) {
+                throw ValidationException::withMessages([
+                    'student_id' => 'Student has no availability set!',
+                ]);
+            }
+
             // Parse the start and end times and check if they are within available days
             [$startTime, $endTime] = $this->getParsedTimes($data['start_time'], $data['end_time'], $availabilities);
 
@@ -42,6 +49,7 @@ final class CreateSession
 
             // Create the session
             $session = Session::create([
+                'teacher_id' => auth()->id(),
                 'student_id' => $studentId,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
@@ -154,5 +162,7 @@ final class CreateSession
         // Schedule the notification (This assumes you have a queue system set up)
         Notification::route('mail', $session->student->email)
             ->notify((new SessionReminderNotification($session))->delay($reminderTime));
+        Notification::route('mail', $session->teacher->email)
+            ->notify((new TeacherSessionReminderNotification($session))->delay($reminderTime));
     }
 }

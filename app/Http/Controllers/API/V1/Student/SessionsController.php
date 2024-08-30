@@ -72,9 +72,28 @@ class SessionsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $sessionId)
     {
-        //
+        try {
+            $session = Session::with(['student', 'teacher'])->find($sessionId);
+
+            if (! $session) {
+                return error_response(
+                    'Session not found!',
+                    null,
+                    Response::HTTP_NOT_FOUND,
+                );
+            }
+
+            return success_response(
+                'Session details fetched successfully!',
+                new SessionResource($session),
+            );
+        } catch (Exception $e) {
+            return error_response(
+                'Something went wrong, please try again later!',
+            );
+        }
     }
 
     /**

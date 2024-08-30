@@ -5,6 +5,7 @@ namespace App\Actions\Student\Session;
 use App\Jobs\SessionRepetitionJob;
 use App\Models\Session;
 use App\Notifications\SessionReminderNotification;
+use App\Notifications\TeacherSessionReminderNotification;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,10 @@ final class RepeatSession
             $studentId = $session->student_id;
             // Fetch student availability
             $availabilities = $session->student?->student?->weekday_availability;
+
+            if ($availabilities && ! count($availabilities)) {
+                throw new Exception('Student has no availability set!');
+            }
 
             // Parse the start and end times and check if they are within available days
             [$startTime, $endTime] = $this->getParsedTimes($nextStartTime, $nextEndTime, $availabilities);
@@ -65,6 +70,9 @@ final class RepeatSession
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function getParsedTimes($startTime, $endTime, $availabilities): array
     {
         $startTime = Carbon::parse($startTime);
@@ -72,12 +80,15 @@ final class RepeatSession
 
         // Check if the session day is within available days
         if (!in_array($startTime->format('l'), $availabilities)) {
-            throw new ValidationException('Session day is not within student availability!');
+            throw new Exception('Session day is not within student availability!');
         }
 
         return [$startTime, $endTime];
     }
 
+    /**
+     * @throws Exception
+     */
     private function checkScheduleTimeAvailability($startTime, $endTime, $studentId): void
     {
         // Calculate total scheduled time for the day
@@ -91,17 +102,20 @@ final class RepeatSession
         $remainingMinutes = 15 - $scheduledMinutes;
 
         if ($remainingMinutes <= 0) {
-            throw new ValidationException('No available time left for scheduling a session today!');
+            throw new Exception('No available time left for scheduling a session today!');
         }
 
         // Ensure the new session doesn't exceed the 15-minute limit
         $newSessionMinutes = $startTime->diffInMinutes($endTime);
 
         if ($newSessionMinutes > $remainingMinutes) {
-            throw new ValidationException("Only $remainingMinutes minute(s) left for scheduling a session today!");
+            throw new Exception("Only $remainingMinutes minute(s) left for scheduling a session today!");
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function checkOverlapExists($studentId, $startTime, $endTime): void
     {
         $overlapExists = Session::where('student_id', $studentId)
@@ -112,14 +126,17 @@ final class RepeatSession
             ->exists();
 
         if ($overlapExists) {
-            throw new ValidationException('Session overlaps with existing one!');
+            throw new Exception('Session overlaps with existing one!');
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function checkDuration($startTime, $endTime): void
     {
         if ($startTime->diffInMinutes($endTime) > 15) {
-            throw new ValidationException('Session duration exceeds 15 minutes!');
+            throw new Exception('Session duration exceeds 15 minutes!');
         }
     }
 
@@ -129,5 +146,7 @@ final class RepeatSession
         // Schedule the notification (This assumes you have a queue system set up)
         Notification::route('mail', $session->student->email)
             ->notify((new SessionReminderNotification($session))->delay($reminderTime));
+        Notification::route('mail', $session->teacher->email)
+            ->notify((new TeacherSessionReminderNotification($session))->delay($reminderTime));
     }
 }
