@@ -13,8 +13,8 @@ class SessionRequest extends FormRequest
     {
         return [
             'student_id' => 'required|exists:users,id',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'repeat' => 'boolean',
         ];
     }
@@ -28,6 +28,18 @@ class SessionRequest extends FormRequest
             'student_id' => 'student',
             'start_time' => 'start time',
             'end_time' => 'end time',
+        ];
+    }
+
+    /**
+     * Get the validation messages that apply to the request.
+     */
+    public function messages(): array
+    {
+        return [
+            'start_time.date_format' => 'The start time does not match the format H:i (24-hour).',
+            'end_time.date_format' => 'The end time does not match the format H:i (24-hour).',
+            'end_time.after' => 'The end time must be a time after start time.',
         ];
     }
 }

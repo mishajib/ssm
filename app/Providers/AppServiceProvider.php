@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Actions\Student\Session\CreateSession;
+use App\Actions\Student\Session\RepeatSession;
 use App\Actions\User\CreateOrUpdateUser;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -18,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CreateOrUpdateUser::class);
+        $this->app->singleton(CreateSession::class);
+        $this->app->singleton(RepeatSession::class);
     }
 
     /**
