@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\V1\User;
+namespace App\Http\Controllers\API\V1\Teacher\User;
 
 use App\Actions\User\CreateOrUpdateUser;
 use App\Http\Controllers\Controller;
@@ -134,7 +134,7 @@ class StudentsController extends Controller
 
             $student->delete();
             return success_response(
-                'Student updated successfully!',
+                'Student deleted successfully!',
                 new UserResource($student),
             );
         } catch (Exception $e) {

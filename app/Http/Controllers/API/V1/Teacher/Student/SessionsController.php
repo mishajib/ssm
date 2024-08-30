@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\API\V1\Student;
+namespace App\Http\Controllers\API\V1\Teacher\Student;
 
 use App\Actions\Student\Session\CreateSession;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\V1\Student\SessionRequest;
 use App\Http\Resources\SessionResource;
-use App\Http\Resources\UserResource;
 use App\Models\Session;
-use App\Models\Student;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -48,7 +45,7 @@ class SessionsController extends Controller
     }
 
     /**
-     * Create Session
+     * Schedule/Create Session
      */
     public function store(SessionRequest $request)
     {
@@ -70,7 +67,7 @@ class SessionsController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Session Details
      */
     public function show(int $sessionId)
     {
@@ -97,26 +94,69 @@ class SessionsController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Rate Session
      */
-    public function edit(string $id)
+    public function update(Request $request, string $sessionId)
     {
-        //
+        $request->validate([
+            'rating' => 'required|numeric|min:1|max:10',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $session = Session::find($sessionId);
+            if (! $session) {
+                return error_response(
+                    'Session not found!',
+                    null,
+                    Response::HTTP_NOT_FOUND,
+                );
+            }
+
+            $session->update([
+                'rating' => $request->get('rating'),
+            ]);
+
+            DB::commit();
+
+            return success_response(
+                'Session rated successfully!',
+                new SessionResource($session),
+            );
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return error_response(
+                'Something went wrong, please try again later!',
+            );
+        }
     }
 
     /**
-     * Update the specified resource in storage.
+     * Delete Session
      */
-    public function update(Request $request, string $id)
+    public function destroy(int $sessionId)
     {
-        //
-    }
+        try {
+            $session = Session::with(['teacher', 'student'])->find($sessionId);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            if (! $session) {
+                return error_response(
+                    'Session not found!',
+                    null,
+                    Response::HTTP_NOT_FOUND,
+                );
+            }
+
+            $session->delete();
+            return success_response(
+                'Session delete successfully!',
+                new SessionResource($session),
+            );
+        } catch (Exception $e) {
+            return error_response(
+                'Something went wrong, please try again later!',
+            );
+        }
     }
 }
